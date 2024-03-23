@@ -1,0 +1,37 @@
+name: Locust Performance Test
+
+on: [push]
+
+jobs:
+  locust:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+        
+    - name: Install Dependencies
+      run: |
+        pip install locust
+        
+    - name: Read Config
+      id: read-config
+      run: |
+        echo "CONFIG=$(cat config.json)" >> $GITHUB_ENV
+        
+    - name: Run Locust
+      run: |
+        locust -f locustfile.py --headless \
+        -u $(echo $CONFIG | jq .users) \
+        -r $(echo $CONFIG | jq .spawn_rate) \
+        --run-time $(echo $CONFIG | jq -r .run_time) \
+        --host $(echo $CONFIG | jq -r .host) \
+        --csv=locust_results
+        
+    - uses: actions/upload-artifact@v2
+      with:
+        name: locust-results
+        path: locust_results_*.csv
