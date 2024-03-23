@@ -17,18 +17,16 @@ jobs:
       run: |
         pip install locust
         
-    - name: Read Config
-      id: read-config
-      run: |
-        echo "CONFIG=$(cat config.json)" >> $GITHUB_ENV
-        
     - name: Run Locust
       run: |
-        locust -f locustfile.py --headless \
-        -u $(echo $CONFIG | jq .users) \
-        -r $(echo $CONFIG | jq .spawn_rate) \
-        --run-time $(echo $CONFIG | jq -r .run_time) \
-        --host $(echo $CONFIG | jq -r .host) \
+        HOST=$(jq -r .host config.json)
+        USERS=$(jq .users config.json)
+        SPAWN_RATE=$(jq .spawn_rate config.json)
+        RUN_TIME=$(jq -r .run_time config.json)
+        locust -f locust.py --headless \
+        -u $USERS -r $SPAWN_RATE \
+        --run-time $RUN_TIME \
+        --host $HOST \
         --csv=locust_results
         
     - uses: actions/upload-artifact@v2
