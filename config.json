@@ -1,0 +1,6 @@
+{
+  "host": "https://jsonplaceholder.typicode.com",
+  "users": 10,
+  "spawn_rate": 5,
+  "run_time": "1m"
+}
