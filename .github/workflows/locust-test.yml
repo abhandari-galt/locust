@@ -1,6 +1,20 @@
 name: Locust Performance Test
 
-on: [push]
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: 'Target host for the load test'
+        required: true
+      users:
+        description: 'Number of concurrent users'
+        required: true
+      spawn_rate:
+        description: 'Rate at which users are spawned'
+        required: true
+      run_time:
+        description: 'Duration of the load test'
+        required: true
 
 jobs:
   locust:
@@ -18,11 +32,12 @@ jobs:
         pip install locust
         
     - name: Run Locust
+      env:
+        HOST: ${{ inputs.host }}
+        USERS: ${{ inputs.users }}
+        SPAWN_RATE: ${{ inputs.spawn_rate }}
+        RUN_TIME: ${{ inputs.run_time }}
       run: |
-        HOST=$(jq -r .host config.json)
-        USERS=$(jq .users config.json)
-        SPAWN_RATE=$(jq .spawn_rate config.json)
-        RUN_TIME=$(jq -r .run_time config.json)
         locust -f locust.py --headless \
         -u $USERS -r $SPAWN_RATE \
         --run-time $RUN_TIME \
